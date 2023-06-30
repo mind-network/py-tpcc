@@ -1,7 +1,7 @@
 import os, redis, time, sys
 from datetime import datetime
 from pprint import pprint,pformat
-from abstractdriver import *
+from .abstractdriver import *
 
 #----------------------------------------------------------------------------
 # Redis TPC-C Driver
@@ -337,7 +337,7 @@ class RedisDriver(AbstractDriver):
 	#------------------------------------------------------------------------
 	def doDelivery(self, params) :
 		if self.debug['delivery'] != 'None' :
-			print 'TXN DELIVERY STARTING ------------------'
+			print('TXN DELIVERY STARTING ------------------')
 			tt = time.time()
 		if self.debug['delivery'] == 'Verbose' :
 			t0 = tt
@@ -388,7 +388,7 @@ class RedisDriver(AbstractDriver):
 		no_o_id = rdr.execute()
 		
 		if self.debug['delivery'] == 'Verbose' :
-			print 'New Order Query: ', time.time() - t0
+			print('New Order Query: ', time.time() - t0)
 			t0 = time.time()
 			
 		#-----------------------
@@ -416,7 +416,7 @@ class RedisDriver(AbstractDriver):
 		ol_ids = rdr.execute()
 		
 		if self.debug['delivery'] == 'Verbose' :
-			print 'Get Customer ID Query:', time.time() - t0
+			print('Get Customer ID Query:', time.time() - t0)
 			t0 = time.time()
 			
 		#-----------------------------
@@ -444,7 +444,7 @@ class RedisDriver(AbstractDriver):
 				ol_total[index] += float(ol_amount)
 		
 		if self.debug['delivery'] == 'Verbose' :
-			print 'Sum Order Line Query:', time.time() - t0
+			print('Sum Order Line Query:', time.time() - t0)
 			t0 = time.time()
 				
 		for d_id in range(1, constants.DISTRICTS_PER_WAREHOUSE + 1) :	
@@ -464,7 +464,7 @@ class RedisDriver(AbstractDriver):
 			wtr.srem('NEW_ORDER.INDEXES.GETNEWORDER.' + no_si_key, no_key)
 			
 			if self.debug['delivery'] == 'Verbose' :
-				print 'Delete New Order Query:', time.time() - t0
+				print('Delete New Order Query:', time.time() - t0)
 				t0 = time.time()
 				
 			#---------------------
@@ -477,7 +477,7 @@ class RedisDriver(AbstractDriver):
 			)
 			
 			if self.debug['delivery'] == 'Verbose' :
-				print 'Update Orders Query:', time.time() - t0
+				print('Update Orders Query:', time.time() - t0)
 				t0 = time.time()
 					
 			#-------------------------
@@ -491,7 +491,7 @@ class RedisDriver(AbstractDriver):
 				)
 			
 			if self.debug['delivery'] == 'Verbose' :
-				print 'Update Order Line Query:', time.time() - t0
+				print('Update Order Line Query:', time.time() - t0)
 				t0 = time.time()
 				
 		#-----------------------
@@ -525,9 +525,9 @@ class RedisDriver(AbstractDriver):
 		wtr.execute()
 		
 		if self.debug['delivery'] == 'Verbose' :
-			print 'Update Customer Query:', time.time() - t0
+			print('Update Customer Query:', time.time() - t0)
 		if self.debug['delivery'] != 'None' :
-			print 'TXN DELIVERY:', time.time() - tt
+			print('TXN DELIVERY:', time.time() - tt)
 			 
 		return result
 	# End doDelivery()
@@ -548,7 +548,7 @@ class RedisDriver(AbstractDriver):
 	#------------------------------------------------------------------------
 	def doNewOrder(self, params) :
 		if self.debug['new-order'] != 'None' :
-			print 'TXN NEW ORDER STARTING -----------------'
+			print('TXN NEW ORDER STARTING -----------------')
 			tt = time.time()
 		if self.debug['new-order'] == 'Verbose' :
 			t0 = tt
@@ -613,7 +613,7 @@ class RedisDriver(AbstractDriver):
 		rdr.hget('WAREHOUSE.' + str(w_id), 'W_TAX')
 		
 		if self.debug['new-order'] == 'Verbose' :
-			print 'Get Warehouse Tax Rate Query:', time.time() - t0
+			print('Get Warehouse Tax Rate Query:', time.time() - t0)
 			t0 = time.time()
 			
 		#--------------------
@@ -622,7 +622,7 @@ class RedisDriver(AbstractDriver):
 		rdr.hgetall('DISTRICT.' + district_key)
 		
 		if self.debug['new-order'] == 'Verbose' :
-			print 'Get District Query:', time.time() - t0
+			print('Get District Query:', time.time() - t0)
 			t0 = time.time()
 			
 		#--------------------
@@ -638,7 +638,7 @@ class RedisDriver(AbstractDriver):
 		c_discount = float(rdr_results[2]['C_DISCOUNT'])
 		
 		if self.debug['new-order'] == 'Verbose' :
-			print 'Get Customer Query:', time.time() - t0
+			print('Get Customer Query:', time.time() - t0)
 			t0 = time.time()
 			
 		#--------------------------
@@ -655,7 +655,7 @@ class RedisDriver(AbstractDriver):
 		wtr.hincrby('DISTRICT.' + district_key, 'D_NEXT_O_ID')
 		
 		if self.debug['new-order'] == 'Verbose' :
-			print 'Increment Next Order ID Query:', time.time() - t0
+			print('Increment Next Order ID Query:', time.time() - t0)
 			t0 = time.time()
 			
 		#--------------------
@@ -677,7 +677,7 @@ class RedisDriver(AbstractDriver):
 		)
 		
 		if self.debug['new-order'] == 'Verbose' :
-			print 'Create Order Query:', time.time() - t0
+			print('Create Order Query:', time.time() - t0)
 			t0 = time.time()
 			
 		# Add index for Order searching
@@ -702,7 +702,7 @@ class RedisDriver(AbstractDriver):
 		wtr.sadd('NEW_ORDER.INDEXES.GETNEWORDER', si_key)
 		
 		if self.debug['new-order'] == 'Verbose' :
-			print 'Create New Order Query:', time.time() - t0
+			print('Create New Order Query:', time.time() - t0)
 			t0 = time.time()
 			
 		#-------------------------------
@@ -753,7 +753,7 @@ class RedisDriver(AbstractDriver):
 				s_dist_xx = si['S_DIST_' + str(d_id)]
 			
 			if self.debug['new-order'] == 'Verbose' :
-				print 'Get Stock Information Query:', time.time() - t0
+				print('Get Stock Information Query:', time.time() - t0)
 				t0 = time.time()
 				
 			#--------------------
@@ -788,7 +788,7 @@ class RedisDriver(AbstractDriver):
 			total += ol_amount
 			
 			if self.debug['new-order'] == 'Verbose' :
-				print 'Update Stock Query:', time.time() - t0
+				print('Update Stock Query:', time.time() - t0)
 				t0 = time.time()
 				
 			#-------------------------
@@ -820,7 +820,7 @@ class RedisDriver(AbstractDriver):
 			)
 			
 			if self.debug['new-order'] == 'Verbose' :
-				print 'Create Order Line Query:', time.time() - t0
+				print('Create Order Line Query:', time.time() - t0)
 				t0 = time.time()
 				
 			## Add the info to be returned
@@ -837,7 +837,7 @@ class RedisDriver(AbstractDriver):
 		misc = [ (w_tax, d_tax, d_next_o_id, total) ]
 		
 		if self.debug['new-order'] != 'None' :
-			print 'TXN NEW ORDER:', time.time() - tt
+			print('TXN NEW ORDER:', time.time() - tt)
 		return [ customer_info, misc, item_data ]
 	
 	#------------------------------------------------------------------------
@@ -853,7 +853,7 @@ class RedisDriver(AbstractDriver):
 	#------------------------------------------------------------------------
 	def doOrderStatus(self, params) :
 		if self.debug['order-status'] != 'None' :
-			print 'TXN ORDER STATUS STARTING --------------'
+			print('TXN ORDER STATUS STARTING --------------')
 			tt = time.time()
 		if self.debug['order-status'] == 'Verbose' :
 			t0 = tt
@@ -883,7 +883,7 @@ class RedisDriver(AbstractDriver):
 			customer = results[0]
 			
 			if self.debug['order-status'] == 'Verbose' :
-				print 'Get Customer By Customer ID Query:', time.time() - t0
+				print('Get Customer By Customer ID Query:', time.time() - t0)
 				t0 = time.time()
 		else:
 			#----------------------------------
@@ -921,7 +921,7 @@ class RedisDriver(AbstractDriver):
 			c_id = customer['C_ID']
 			
 			if self.debug['order-status'] == 'Verbose' :
-				print 'Get Customers By Last Name Query:', time.time() - t0
+				print('Get Customers By Last Name Query:', time.time() - t0)
 				t0 = time.time()
 		assert len(customer) > 0
 		assert c_id != None
@@ -935,7 +935,7 @@ class RedisDriver(AbstractDriver):
 		order_id_set = results[0]
 		
 		if self.debug['order-status'] == 'Verbose' :
-			print 'Get Last Order Query:', time.time() - t0
+			print('Get Last Order Query:', time.time() - t0)
 			t0 = time.time()
 			
 		order = [ ]
@@ -974,12 +974,12 @@ class RedisDriver(AbstractDriver):
 				])
 				
 			if self.debug['order-status'] == 'Verbose' :
-				print 'Get Order Lines Query:', time.time() - t0
+				print('Get Order Lines Query:', time.time() - t0)
 		else :
 			orderLines = [ ]
 		
 		if self.debug['order-status'] != 'None' :
-			print 'TXN ORDER STATUS:', time.time() - tt
+			print('TXN ORDER STATUS:', time.time() - tt)
 			
 		return [ customer, order, orderLines ]
 	
@@ -1000,7 +1000,7 @@ class RedisDriver(AbstractDriver):
 	#------------------------------------------------------------------------
 	def doPayment(self, params) :
 		if self.debug['payment'] != 'None' :
-			print 'TXN PAYMENT STARTING -------------------'
+			print('TXN PAYMENT STARTING -------------------')
 			tt = time.time()
 		if self.debug['payment'] == 'Verbose' :
 			t0 = tt
@@ -1031,7 +1031,7 @@ class RedisDriver(AbstractDriver):
 			customer = results[0]
 			
 			if self.debug['payment'] == 'Verbose' :
-				print 'Get Customer By ID Query:', time.time() - t0
+				print('Get Customer By ID Query:', time.time() - t0)
 				t0 = time.time()
 		else:
 			#----------------------------------
@@ -1069,7 +1069,7 @@ class RedisDriver(AbstractDriver):
 			c_id = customer['C_ID']
 		
 			if self.debug['payment'] == 'Verbose' :
-				print 'Get Customers By Last Name Query:', time.time() - t0
+				print('Get Customers By Last Name Query:', time.time() - t0)
 				t0 = time.time()
 				
 		assert len(customer) > 0
@@ -1086,7 +1086,7 @@ class RedisDriver(AbstractDriver):
 		rdr.hgetall('WAREHOUSE.' + str(w_id))
 		
 		if self.debug['payment'] == 'Verbose' :
-			print 'Get Warehouse Query:', time.time() - t0
+			print('Get Warehouse Query:', time.time() - t0)
 			t0 = time.time()
 			
 		#--------------------
@@ -1097,7 +1097,7 @@ class RedisDriver(AbstractDriver):
 		warehouse, district = rdr.execute()
 		
 		if self.debug['payment'] == 'Verbose' :
-			print 'Get District Query:', time.time() - t0
+			print('Get District Query:', time.time() - t0)
 			t0 = time.time()
 			
 		#--------------------------------
@@ -1109,7 +1109,7 @@ class RedisDriver(AbstractDriver):
 		)
 		
 		if self.debug['payment'] == 'Verbose' :
-			print 'Update Warehouse Query:', time.time() - t0
+			print('Update Warehouse Query:', time.time() - t0)
 			t0 = time.time()
 			
 		#-------------------------------
@@ -1121,7 +1121,7 @@ class RedisDriver(AbstractDriver):
 		)
 		
 		if self.debug['payment'] == 'Verbose' :
-			print 'Update District Balance Query:', time.time() - t0
+			print('Update District Balance Query:', time.time() - t0)
 			t0 = time.time()
 			
 		if customer['C_CREDIT'] == constants.BAD_CREDIT:
@@ -1150,7 +1150,7 @@ class RedisDriver(AbstractDriver):
 			)
 			
 			if self.debug['payment'] == 'Verbose' :
-				print 'Update Bad Credit Customer Query:', time.time() - t0
+				print('Update Bad Credit Customer Query:', time.time() - t0)
 				t0 = time.time()
 		else:
 			#-----------------------------------
@@ -1166,7 +1166,7 @@ class RedisDriver(AbstractDriver):
 				}
 			)
 			if self.debug['payment'] == 'Verbose' :
-				print 'Update Good Credit Customer Query:', time.time() - t0
+				print('Update Good Credit Customer Query:', time.time() - t0)
 				t0 = time.time()
 				
 		wtr.execute()	
@@ -1196,7 +1196,7 @@ class RedisDriver(AbstractDriver):
 		)
 		
 		if self.debug['payment'] == 'Verbose' :
-			print 'Insert History Query:', time.time() - t0
+			print('Insert History Query:', time.time() - t0)
 			t0 = time.time()
 			
 		wtr.execute()
@@ -1213,7 +1213,7 @@ class RedisDriver(AbstractDriver):
 		# Hand back all the warehouse, district, and customer data
 		
 		if self.debug['payment'] != 'None' :
-			print 'TXN PAYMENT:', time.time() - tt
+			print('TXN PAYMENT:', time.time() - tt)
 		
 		return [ warehouse, district, customer ]
 	
@@ -1229,7 +1229,7 @@ class RedisDriver(AbstractDriver):
 	#------------------------------------------------------------------------	
 	def doStockLevel(self, params) :
 		if self.debug['order-status'] != 'None' :
-			print 'TXN STOCK LEVEL STARTING ---------------'
+			print('TXN STOCK LEVEL STARTING ---------------')
 			tt = time.time()
 		if self.debug['stock-level'] == 'Verbose' :
 			t0 = tt
@@ -1253,7 +1253,7 @@ class RedisDriver(AbstractDriver):
 		o_id = results[0]
 		
 		if self.debug['stock-level'] == 'Verbose' :
-			print 'Get Order ID Query:', time.time() - t0
+			print('Get Order ID Query:', time.time() - t0)
 			t0 = time.time()
 			
 		#-----------------------
@@ -1279,9 +1279,9 @@ class RedisDriver(AbstractDriver):
 				stock_counts[order_lines[index]['OL_I_ID']] = order_lines[index]['OL_I_ID']
 		
 		if self.debug['stock-level'] == 'Verbose' :
-			print 'Get Stock Count Query:', time.time() - t0
+			print('Get Stock Count Query:', time.time() - t0)
 		if self.debug['stock-level'] != 'None' :
-			print 'TXN STOCK LEVEL:', time.time() - tt
+			print('TXN STOCK LEVEL:', time.time() - tt)
 			
 		return len(stock_counts)
 		
@@ -1291,7 +1291,7 @@ class RedisDriver(AbstractDriver):
 	# @param dictionary config (configuration options)
 	#------------------------------------------------------------------------
 	def loadConfig(self, config) : 
-		for key in RedisDriver.DEFAULT_CONFIG.keys() :
+		for key in list(RedisDriver.DEFAULT_CONFIG.keys()) :
 			assert key in config, "Missing parameter '%s' in the %s configuration" % (key, self.name)
 		
 		hosts = config["databases"].split()	
@@ -1300,9 +1300,9 @@ class RedisDriver(AbstractDriver):
 		for host in hosts :
 			db, port_str = host.split(':')
 			port = int(port_str)
-			print 'Connectiong to host %s on port %s' % (db, port)
+			print('Connectiong to host %s on port %s' % (db, port))
 			self.databases.append(redis.Redis(host=db, port=port, db=0))
-			print str(self.databases[c_num].ping())
+			print(str(self.databases[c_num].ping()))
 			self.r_pipes.append(self.databases[c_num].pipeline(False))
 			self.r_sizes.append(0)
 			self.w_pipes.append(self.databases[c_num].pipeline(True))
@@ -1327,11 +1327,11 @@ class RedisDriver(AbstractDriver):
 		self.debug['stock-level'] = config['debug-stock-level']
 		
 		if config['host-info'] != 'None' :
-			print 'TPC-C Benchmark Running on Redis with %s nodes' % (len(hosts))
+			print('TPC-C Benchmark Running on Redis with %s nodes' % (len(hosts)))
 		if config['host-info'] == 'Verbose' :
 			for host in hosts :
 				db, port = host.split(':')
-				print 'Host: %s | Port: %s' % (db, port)
+				print('Host: %s | Port: %s' % (db, port))
 		# End loadConfig()
 
 	#------------------------------------------------------------------------
@@ -1342,16 +1342,16 @@ class RedisDriver(AbstractDriver):
 		for index in range(len(self.w_pipes)) :
 			if self.w_sizes[index] > 0 :
 				if self.debug['load'] != 'None' :
-					print index, 
+					print(index, end=' ') 
 				self.w_pipes[index].execute()
 				self.w_sizes[index] = 0
 		
 		elapsed = time.time() - self.t0
-		print ''
-		print 'Loading Complete: ' + str(elapsed) + ' elapsed'
+		print('')
+		print('Loading Complete: ' + str(elapsed) + ' elapsed')
 		
 		# Store Metadata
-		for table, next in self.next_scores.items() :
+		for table, next in list(self.next_scores.items()) :
 			self.metadata.set(table + '.next_score', next)
 	# End loadFinish()
 	
@@ -1360,7 +1360,7 @@ class RedisDriver(AbstractDriver):
 	#------------------------------------------------------------------------
 	def loadStart(self) :
 		if self.debug['load'] != 'None':
-			print 'Starting data load'
+			print('Starting data load')
 		self.t0 = time.time()
 		self.next_scores = {
 			'WAREHOUSE'  : 1,
@@ -1386,7 +1386,7 @@ class RedisDriver(AbstractDriver):
 		# Instantiate Column-mapping
 		column_map = self.TABLES[tableName]['map']
 		if self.debug['load'] == 'Verbose' :
-			print tableName,
+			print(tableName, end=' ')
 			
 		for record in tuples :
 			# Determine at which node to store this data
@@ -1620,13 +1620,13 @@ class RedisDriver(AbstractDriver):
 			for index in range(len(self.w_pipes)) :
 				if self.w_sizes[index] > 10000 :
 					if self.debug['load'] != 'None' :
-						print index, 
+						print(index, end=' ') 
 						sys.stdout.flush()
 					self.w_pipes[index].execute()
 					self.w_sizes[index] = 0
 		
 		if self.debug['load'] == 'Verbose' :
-			print ''
+			print('')
 	# End loadTuples()
 	
 	#------------------------------------------------------------------------

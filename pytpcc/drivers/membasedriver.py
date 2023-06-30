@@ -25,16 +25,16 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 # -----------------------------------------------------------------------
 
-from __future__ import with_statement
+
 
 import os,time
 import logging
-import commands
+import subprocess
 import memcache
 from pprint import pprint,pformat
 
 import constants
-from abstractdriver import *
+from .abstractdriver import *
 MAX_CUSTOMER_ID = 3000
 MAX_ORDER_ID = 2999
 
@@ -169,7 +169,7 @@ TABLE_COLUMNS = {
 }
 
 def irange(sequence):
-    return zip(range(len(sequence)),sequence)
+    return list(zip(list(range(len(sequence))),sequence))
 
 def filter_table(sec_keys,table_values,table_name):
     
@@ -244,7 +244,7 @@ class MembaseDriver(AbstractDriver):
     ## loadConfig
     ## ----------------------------------------------
     def loadConfig(self, config):
-        for key in MembaseDriver.DEFAULT_CONFIG.keys():
+        for key in list(MembaseDriver.DEFAULT_CONFIG.keys()):
             assert key in config, "Missing parameter '%s' in %s configuration" % (key, self.name)
         
         connection_string = config['host'] +":"+ str(config['port'])
@@ -277,7 +277,7 @@ class MembaseDriver(AbstractDriver):
     
     def loadTuples(self, tableName, tuples):
         if len(tuples) == 0: 
-            print "NO DATA"
+            print("NO DATA")
             return
         temp_max_id = self.conn.get(tableName+"_max_pkey")
         if temp_max_id == None:
@@ -331,7 +331,7 @@ class MembaseDriver(AbstractDriver):
         end_time = time.time()
         self.load_time += (end_time - start_time)
         self.conn.replace(tableName+"_max_pkey",temp_max_id)     
-        print "[",tableName,"]"," Current Load Time: ",self.load_time
+        print(("[",tableName,"]"," Current Load Time: ",self.load_time))
         logging.debug("Loaded %d tuples for tableName %s" % (len(tuples), tableName))
         return
 
@@ -926,7 +926,7 @@ class MembaseDriver(AbstractDriver):
             orderby_map[idx] = field_value
     
         import operator
-        sorted_index_list = sorted(orderby_map.items(), key=operator.itemgetter(1),reverse=False)    
+        sorted_index_list = sorted(list(orderby_map.items()), key=operator.itemgetter(1),reverse=False)    
         
         return sorted_index_list
         #store index, value & then sort...

@@ -36,9 +36,9 @@ import glob
 import time
 from pprint import pprint,pformat
 
-from util import *
-from runtime import *
-import drivers
+from .util import *
+from .runtime import *
+from . import drivers
 
 EMPTY = 0
 CMD_LOAD = 1

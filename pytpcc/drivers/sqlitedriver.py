@@ -29,16 +29,16 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 # -----------------------------------------------------------------------
 
-from __future__ import with_statement
+
 
 import os
 import sqlite3
 import logging
-import commands
+import subprocess
 from pprint import pprint,pformat
 
 import constants
-from abstractdriver import *
+from .abstractdriver import *
 
 TXN_QUERIES = {
     "DELIVERY": {
@@ -122,7 +122,7 @@ class SqliteDriver(AbstractDriver):
     ## loadConfig
     ## ----------------------------------------------
     def loadConfig(self, config):
-        for key in SqliteDriver.DEFAULT_CONFIG.keys():
+        for key in list(SqliteDriver.DEFAULT_CONFIG.keys()):
             assert key in config, "Missing parameter '%s' in %s configuration" % (key, self.name)
         
         self.database = str(config["database"])
@@ -135,7 +135,7 @@ class SqliteDriver(AbstractDriver):
             logging.debug("Loading DDL file '%s'" % (self.ddl))
             ## HACK
             cmd = "sqlite3 %s < %s" % (self.database, self.ddl)
-            (result, output) = commands.getstatusoutput(cmd)
+            (result, output) = subprocess.getstatusoutput(cmd)
             assert result == 0, cmd + "\n" + output
         ## IF
             

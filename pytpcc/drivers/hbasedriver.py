@@ -41,7 +41,7 @@ from org.apache.hadoop.hbase import HBaseConfiguration, HTableDescriptor, HColum
 from org.apache.hadoop.hbase.client import HBaseAdmin, HTable, Put, Get, Scan, Delete, Result, ResultScanner
 from org.apache.hadoop.hbase.util import Bytes
 from org.apache.hadoop.hbase.filter import PrefixFilter
-from abstractdriver import AbstractDriver
+from .abstractdriver import AbstractDriver
 from pprint import pprint,pformat
 
 

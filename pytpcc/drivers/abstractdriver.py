@@ -57,7 +57,7 @@ class AbstractDriver(object):
         ret += "# Created %s\n" % (datetime.now())
         ret += "[%s]" % self.name
 
-        for name in config.keys():
+        for name in list(config.keys()):
             desc, default = config[name]
             if not default:
                 default = ""

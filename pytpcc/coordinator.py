@@ -36,14 +36,14 @@ import glob
 import time
 import pickle
 import execnet
-import worker
-import message
-from ConfigParser import SafeConfigParser
+from . import worker
+from . import message
+from configparser import SafeConfigParser
 from pprint import pprint, pformat
 
-from util import *
-from runtime import *
-import drivers
+from .util import *
+from .runtime import *
+from . import drivers
 
 logging.basicConfig(level = logging.INFO,
                     format="%(asctime)s [%(funcName)s:%(lineno)03d] %(levelname)-5s: %(message)s",
@@ -65,7 +65,7 @@ def createDriverClass(name):
 ## ==============================================
 def getDrivers():
     drivers = []
-    for f in map(lambda x: os.path.basename(x).replace("driver.py", ""), glob.glob("./drivers/*driver.py")):
+    for f in [os.path.basename(x).replace("driver.py", "") for x in glob.glob("./drivers/*driver.py")]:
         if f != "abstract": drivers.append(f)
     return drivers
 ## DEF
@@ -76,11 +76,11 @@ def getDrivers():
 def startLoading(scalParameters,args,config,channels):
     #Split the warehouses into chunks
     procs = len(channels)
-    w_ids = map(lambda x:[], range(procs))
+    w_ids = [[] for x in range(procs)]
     for w_id in range(scaleParameters.starting_warehouse, scaleParameters.ending_warehouse+1):
         idx = w_id % procs
         w_ids[idx].append(w_id)
-    print w_ids
+    print(w_ids)
 
     load_start=time.time()
     for i in range(len(channels)):
@@ -153,8 +153,8 @@ if __name__ == '__main__':
     assert driver != None, "Failed to create '%s' driver" % args['system']
     if args['print_config']:
         config = driver.makeDefaultConfig()
-        print driver.formatConfig(config)
-        print
+        print((driver.formatConfig(config)))
+        print()
         sys.exit(0)
 
     ## Load Configuration file
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     else:
         logging.debug("Using default configuration for %s" % args['system'])
         defaultConfig = driver.makeDefaultConfig()
-        config = dict(map(lambda x: (x, defaultConfig[x][1]), defaultConfig.keys()))
+        config = dict([(x, defaultConfig[x][1]) for x in list(defaultConfig.keys())])
     config['reset'] = args['reset']
     config['load'] = False
     config['execute'] = False
@@ -209,7 +209,7 @@ if __name__ == '__main__':
         results = startExecution(scaleParameters, args, config,channels)
         assert results
         logging.info(results.show(load_time, driver, len(channels)))
-        print results.show(load_time, driver, len(channels))
+        print((results.show(load_time, driver, len(channels))))
     ## IF
 
 ## MAIN

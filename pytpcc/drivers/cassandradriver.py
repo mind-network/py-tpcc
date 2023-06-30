@@ -31,12 +31,12 @@ from pycassa.system_manager import *
 
 import os
 import logging
-import commands
+import subprocess
 import uuid
 from pprint import pprint,pformat
 import constants
 
-from abstractdriver import *
+from .abstractdriver import *
 ## ==============================================
 ## AbstractDriver
 ## ==============================================
@@ -71,7 +71,7 @@ class CassandraDriver(AbstractDriver):
         return CassandraDriver.DEFAULT_CONFIG
 
     def loadConfig(self,config):
-	for key in CassandraDriver.DEFAULT_CONFIG.keys():
+	for key in list(CassandraDriver.DEFAULT_CONFIG.keys()):
             assert key in config, "Missing parameter '%s' in %s configuration" % (key, self.name)        
         
          

@@ -91,7 +91,7 @@ BAD_CREDIT = "BC"
 MIN_CARRIER_ID = 1
 MAX_CARRIER_ID = 10
 #  HACK: This is not strictly correct, but it works
-NULL_CARRIER_ID = 0L
+NULL_CARRIER_ID = 0
 #  o_id < than this value, carrier != null, >= -> carrier == null
 NULL_CARRIER_LOWER_BOUND = 2101
 MIN_OL_CNT = 5
@@ -153,7 +153,8 @@ ALL_TABLES = [
 
 # Transaction Types
 def enum(*sequential, **named):
-    enums = dict(map(lambda x: (x, x), sequential))
+    #enums = dict(map(lambda x: (x, x), sequential))
+    enums = dict([(x, x) for x in sequential])
     # dict(zip(sequential, range(len(sequential))), **named)
     return type('Enum', (), enums)
 TransactionTypes = enum(

@@ -35,7 +35,7 @@ import argparse
 import glob
 import time
 import multiprocessing
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 from pprint import pprint, pformat
 
 from util import results, scaleparameters
@@ -122,7 +122,7 @@ def loaderFunc(driverClass, scaleParameters, args, config, w_ids):
         driver.loadFinish()
     except KeyboardInterrupt:
         return -1
-    except (Exception, AssertionError), ex:
+    except (Exception, AssertionError) as ex:
         logging.warn("Failed to load data: %s", ex)
         raise
 
@@ -184,7 +184,7 @@ if __name__ == '__main__':
     aparser = argparse.ArgumentParser(description='Python implementation of the TPC-C Benchmark')
     aparser.add_argument('system', choices=getDrivers(),
                          help='Target system driver')
-    aparser.add_argument('--config', type=file,
+    aparser.add_argument('--config', type=open,
                          help='Path to driver configuration file')
     aparser.add_argument('--reset', action='store_true',
                          help='Instruct the driver to reset the contents of the database')
@@ -221,8 +221,8 @@ if __name__ == '__main__':
     assert driver != None, "Failed to create '%s' driver" % args['system']
     if args['print_config']:
         config = driver.makeDefaultConfig()
-        print driver.formatConfig(config)
-        print
+        print((driver.formatConfig(config)))
+        print()
         sys.exit(0)
 
     ## Load Configuration file
@@ -234,7 +234,7 @@ if __name__ == '__main__':
     else:
         logging.debug("Using default configuration for %s", args['system'])
         defaultConfig = driver.makeDefaultConfig()
-        config = dict([(param, defaultConfig[param][1]) for param in defaultConfig.keys()])
+        config = dict([(param, defaultConfig[param][1]) for param in list(defaultConfig.keys())])
     config['reset'] = args['reset']
     config['load'] = False
     config['execute'] = False
@@ -258,7 +258,7 @@ if __name__ == '__main__':
             l = loader.Loader(
                 driver,
                 scaleParameters,
-                range(scaleParameters.starting_warehouse, scaleParameters.ending_warehouse+1),
+                list(range(scaleParameters.starting_warehouse, scaleParameters.ending_warehouse+1)),
                 True
             )
             driver.loadStart()

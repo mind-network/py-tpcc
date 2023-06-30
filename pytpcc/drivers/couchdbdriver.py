@@ -28,7 +28,7 @@ import logging
 from pprint import pformat
 
 import constants
-from abstractdriver import *
+from .abstractdriver import *
 
 import couchdb
 from uuid import uuid4
@@ -238,7 +238,7 @@ class CouchdbDriver(AbstractDriver):
     ## loadConfig
     ## ----------------------------------------------
     def loadConfig(self, config):
-        for key in CouchdbDriver.DEFAULT_CONFIG.keys():
+        for key in list(CouchdbDriver.DEFAULT_CONFIG.keys()):
             assert key in config, "Missing parameter '%s' in %s configuration" % (key, self.name)
 
         # open servers
@@ -248,7 +248,7 @@ class CouchdbDriver(AbstractDriver):
             # note, that couchdb would commit the data once per several seconds anyway
             self.servers.append(couchdb.Server(url = srv_name, full_commit = False))
 
-        db_names = [db_from_table(table) for table in TPCC_SCM.keys()]
+        db_names = [db_from_table(table) for table in list(TPCC_SCM.keys())]
 
         # delete the dbs if we're resetting
         if config["reset"]:
@@ -317,7 +317,7 @@ class CouchdbDriver(AbstractDriver):
             # replicated over all shard nodes
             #
             # it is assumed that the 'distr_key' is integer
-            if TPCC_SCM[table_name].has_key("distr_key"):
+            if "distr_key" in TPCC_SCM[table_name]:
                 distr_key = int(doc[TPCC_SCM[table_name]["distr_key"]])
                 shard = self.shard_from_id(distr_key)
             else:
@@ -364,7 +364,7 @@ class CouchdbDriver(AbstractDriver):
         CouchDB would do it in a lazy way, during a first query. We don't want that at all!
         """
         view_touch_jobs = []
-        for table in TPCC_SCM.keys():
+        for table in list(TPCC_SCM.keys()):
             if 'indexes' in TPCC_SCM[table]:
                 for srv_num, srv in enumerate(self.servers):
                     # load the design doc: _design/tpcc
@@ -377,7 +377,7 @@ class CouchdbDriver(AbstractDriver):
                         # happens if we have multiple loaders. This is okay. The design doc is still the same.
                         pass
                     finally:
-                        for view_name in TPCC_SCM[table]['indexes'].keys():
+                        for view_name in list(TPCC_SCM[table]['indexes'].keys()):
                             view_touch_jobs.append((cdb, view_name))
 
         # we want actually to initialize views in parallel on all shard nodes
@@ -411,7 +411,7 @@ class CouchdbDriver(AbstractDriver):
                     include_docs = 'true', startkey = gen_pk_doc('NEW_ORDER', {'NO_D_ID': d_id, 'NO_W_ID': w_id, 'NO_O_ID' : 0})).rows
 
                 # it seems that we might fetch a deleted doc in case there are no more. Nice...
-                if newOrder[0]['value'].has_key('deleted') and newOrder[0]['value']['deleted'] == True:
+                if 'deleted' in newOrder[0]['value'] and newOrder[0]['value']['deleted'] == True:
                     logging.debug("No documents: _all_docs returned a deleted one. Skipping...")
                     newOrder = []
 
@@ -456,7 +456,7 @@ class CouchdbDriver(AbstractDriver):
         for i in range(len(no_o_ids)):
             # find the total for the current (order, district, warehouse)
             # is there some way to find stuff in a list fast?
-            ol_total = filter(lambda x: x.key == [no_o_ids[i][1], no_o_ids[i][0], w_id], ol_totals)[0].value
+            ol_total = [x for x in ol_totals if x.key == [no_o_ids[i][1], no_o_ids[i][0], w_id]][0].value
             # These must be logged in the "result file" according to TPC-C 2.7.2.2 (page 39)
             # We remove the queued time, completed time, w_id, and o_carrier_id: the client can figure
             # them out
@@ -532,7 +532,7 @@ class CouchdbDriver(AbstractDriver):
 
             # get info about the item from the just retrieved bundle
             # filter is  just for finding an item in a list
-            doc = filter(lambda it: it.id == str(i_ids[i]), item_data)[0].doc
+            doc = [it for it in item_data if it.id == str(i_ids[i])][0].doc
 
             ## TPCC defines 1% of neworder gives a wrong itemid, causing rollback.
             ## Note that this will happen with 1% of transactions on purpose.
@@ -636,8 +636,8 @@ class CouchdbDriver(AbstractDriver):
 
             # don't insert the order line right now
             # we'll do it in bulk later
-            order_line_row = dict(zip(TPCC_SCM['ORDER_LINE']['attrs'], [d_next_o_id, d_id, w_id, ol_number, ol_i_id, ol_supply_w_id,
-                                        o_entry_d, ol_quantity, ol_amount, s_dist_xx]))
+            order_line_row = dict(list(zip(TPCC_SCM['ORDER_LINE']['attrs'], [d_next_o_id, d_id, w_id, ol_number, ol_i_id, ol_supply_w_id,
+                                        o_entry_d, ol_quantity, ol_amount, s_dist_xx])))
             order_line_row['_id'] = gen_pk_doc('ORDER_LINE', order_line_row)
             order_line_docs.append(order_line_row)
 
@@ -650,11 +650,11 @@ class CouchdbDriver(AbstractDriver):
         ## ----------------
         self.dbs[db_from_table('ORDER_LINE')][self.shard_from_id(w_id)].update(order_line_docs)
 
-        orders_row = dict(zip(TPCC_SCM['ORDERS']['attrs'], [d_next_o_id, c_id, d_id, w_id, o_entry_d, o_carrier_id, ol_cnt, all_local]))
+        orders_row = dict(list(zip(TPCC_SCM['ORDERS']['attrs'], [d_next_o_id, c_id, d_id, w_id, o_entry_d, o_carrier_id, ol_cnt, all_local])))
         orders_row['_id'] = gen_pk_doc('ORDERS', orders_row)
         self.dbs[db_from_table('ORDERS')][self.shard_from_id(w_id)].save(orders_row)
 
-        new_order_row = dict(zip(TPCC_SCM['NEW_ORDER']['attrs'], [d_next_o_id, d_id, w_id]))
+        new_order_row = dict(list(zip(TPCC_SCM['NEW_ORDER']['attrs'], [d_next_o_id, d_id, w_id])))
         new_order_row['_id'] = gen_pk_doc('NEW_ORDER', new_order_row)
         self.dbs[db_from_table('NEW_ORDER')][self.shard_from_id(w_id)].save(new_order_row)
 
@@ -809,7 +809,7 @@ class CouchdbDriver(AbstractDriver):
         # Concatenate w_name, four spaces, d_name
         h_data = "%s    %s" % (warehouse['W_NAME'], district['D_NAME'])
         # Create the history record
-        hist = dict(zip(TPCC_SCM['HISTORY']['attrs'],[c_id, c_d_id, c_w_id, d_id, w_id, h_date, h_amount, h_data]))
+        hist = dict(list(zip(TPCC_SCM['HISTORY']['attrs'],[c_id, c_d_id, c_w_id, d_id, w_id, h_date, h_amount, h_data])))
         self.dbs[db_from_table('HISTORY')][self.shard_from_id(c_w_id)].save(hist)
 
         # TPC-C 2.5.3.3: Must display the following fields:

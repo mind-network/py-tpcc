@@ -24,8 +24,8 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 # -----------------------------------------------------------------------
 
-from __future__ import with_statement
-from abstractdriver import *
+
+from .abstractdriver import *
 from pprint import pprint, pformat
 from pyrant import protocol
 
@@ -242,34 +242,34 @@ class TokyocabinetDriver(AbstractDriver):
 	## loadConfig
 	## ----------------------------------------------
 	def loadConfig(self, config):
-		for key in TokyocabinetDriver.DEFAULT_CONFIG.keys():
+		for key in list(TokyocabinetDriver.DEFAULT_CONFIG.keys()):
 			assert key in config, "Missing parameter '%s' in %s configuration" % (key, self.name)
 
 		if config["servers"]:
 			# Whn reading from INI file, we need to convert the server
 			# description-object from string to a real dictionary
 			config["servers"] = eval(config["servers"])
-			for serverId, tables in config["servers"].iteritems():
+			for serverId, tables in list(config["servers"].items()):
 				self.databases[serverId] = tables
 
 		# First connect to databases
-		for serverId, tables in self.databases.iteritems():
+		for serverId, tables in list(self.databases.items()):
 			self.conn[serverId] = dict()
-			for tab, values in tables.iteritems():
+			for tab, values in list(tables.items()):
 				self.conn[serverId][tab] = pyrant.Tyrant(values["host"], values["port"])
 		## FOR
 
 		# Remove previous data
 		if config["reset"]:
-			for serverId, tables in self.conn.iteritems():
-				for tab in tables.keys():
+			for serverId, tables in list(self.conn.items()):
+				for tab in list(tables.keys()):
 					logging.debug("Deleting database '%s' at server '%s'" % (tab, serverId))
 					self.conn[serverId][tab].clear()
 				## FOR
 			## FOR
 		## IF
 
-		self.numServers = len(self.databases.keys())
+		self.numServers = len(list(self.databases.keys()))
 		logging.info("Number of servers: %s" % self.numServers)
 
 	## -------------------------------------------
@@ -288,20 +288,20 @@ class TokyocabinetDriver(AbstractDriver):
 
 		assert tableName in TABLE_COLUMNS, "Unexpected table %s" % tableName
 		columns = TABLE_COLUMNS[tableName]
-		num_columns = xrange(len(columns))
+		num_columns = list(range(len(columns)))
 		records = list()
 
 		if tableName == constants.TABLENAME_WAREHOUSE:
 			for t in tuples:
 				w_key = t[0] # W_ID
 				sID = self.getServer(w_key)
-				cols = dict(map(lambda i: (columns[i], t[i]), num_columns))
+				cols = dict([(columns[i], t[i]) for i in num_columns])
 				records.append((str(w_key), cols))
 			## FOR
 
 			try:
 				self.conn[sID][tableName].multi_set(records)
-			except KeyError, err:
+			except KeyError as err:
 				sys.stderr.write("%s(%s): server ID does not exist or is offline\n" %(KeyError, err))
 				sys.exit(1)
 
@@ -310,13 +310,13 @@ class TokyocabinetDriver(AbstractDriver):
 				w_key = t[1] # W_ID
 				sID = self.getServer(w_key)
 				d_key = self.tupleToString(t[:2]) # D_ID, D_W_ID
-				cols = dict(map(lambda i: (columns[i], t[i]), num_columns))
+				cols = dict([(columns[i], t[i]) for i in num_columns])
 				records.append((d_key, cols))
 			## FOR
 
 			try:
 				self.conn[sID][tableName].multi_set(records)
-			except KeyError, err:
+			except KeyError as err:
 				sys.stderr.write("%s(%s): server ID does not exist or is offline\n" %(KeyError, err))
 				sys.exit(1)
 
@@ -325,14 +325,14 @@ class TokyocabinetDriver(AbstractDriver):
 		elif tableName == constants.TABLENAME_ITEM:
 			for t in tuples:
 				i_key = str(t[0])
-				cols = dict(map(lambda i: (columns[i], t[i]), num_columns))
+				cols = dict([(columns[i], t[i]) for i in num_columns])
 				records.append((i_key, cols))
 			## FOR
 
-			for i in xrange(self.numServers):
+			for i in range(self.numServers):
 				try:
 					self.conn[i][tableName].multi_set(records)
-				except KeyError, err:
+				except KeyError as err:
 					sys.stderr.write("%s(%s): server ID doesn't exist or is offline\n" %(KeyError, err))
 					sys.exit(1)
 				## FOR
@@ -343,13 +343,13 @@ class TokyocabinetDriver(AbstractDriver):
 				w_key = t[2] # W_ID
 				sID = self.getServer(w_key)
 				c_key = self.tupleToString(t[:3]) # C_ID, C_D_ID, C_W_ID
-				cols = dict(map(lambda i: (columns[i], t[i]), num_columns))
+				cols = dict([(columns[i], t[i]) for i in num_columns])
 				records.append((c_key, cols))
 			## FOR
 
 			try:
 				self.conn[sID][tableName].multi_set(records)
-			except KeyError, err:
+			except KeyError as err:
 				sys.stderr.write("%s(%s): server ID does not exist or is offline\n" %(KeyError, err))
 				sys.exit(1)
 
@@ -360,13 +360,13 @@ class TokyocabinetDriver(AbstractDriver):
 				# something tobe our key
 				h_key = self.tupleToString(t[:3]) # H_C_ID, H_C_D, H_C_W
 				sID = self.getServer(w_key)
-				cols = dict(map(lambda i: (columns[i], t[i]), num_columns))
+				cols = dict([(columns[i], t[i]) for i in num_columns])
 				records.append((h_key, cols))
 			## FOR
 
 			try:
 				self.conn[sID][tableName].multi_set(records)
-			except KeyError, err:
+			except KeyError as err:
 				sys.stderr.write("%s(%s): server ID does not exist or is offline\n" %(KeyError, err))
 				sys.exit(1)
 
@@ -375,13 +375,13 @@ class TokyocabinetDriver(AbstractDriver):
 				w_key = t[1] # W_ID
 				sID = self.getServer(w_key)
 				s_key = self.tupleToString(t[:2]) # S_ID, S_W_ID
-				cols = dict(map(lambda i: (columns[i], t[i]), num_columns))
+				cols = dict([(columns[i], t[i]) for i in num_columns])
 				records.append((s_key, cols))
 			## FOR
 
 			try:
 				self.conn[sID][tableName].multi_set(records)
-			except KeyError, err:
+			except KeyError as err:
 				sys.stderr.write("%s(%s): server ID does not exist or is offline\n" %(KeyError, err))
 				sys.exit(1)
 
@@ -390,13 +390,13 @@ class TokyocabinetDriver(AbstractDriver):
 				w_key = t[3] # W_ID
 				sID = self.getServer(w_key)
 				o_key = self.tupleToString(t[1:4]) # O_ID, O_D_ID, O_W_ID
-				cols = dict(map(lambda i: (columns[i], t[i]), num_columns))
+				cols = dict([(columns[i], t[i]) for i in num_columns])
 				records.append((o_key, cols))
 			## FOR
 
 			try:
 				self.conn[sID][tableName].multi_set(records)
-			except KeyError, err:
+			except KeyError as err:
 				sys.stderr.write("%s(%s): server ID does not exist or is offline\n" %(KeyError, err))
 				sys.exit(1)
 
@@ -405,13 +405,13 @@ class TokyocabinetDriver(AbstractDriver):
 				w_key = t[2] # W_ID
 				sID = self.getServer(w_key)
 				no_key = self.tupleToString(t[:3]) # NO_O_ID, NO_D_ID, NO_W_ID
-				cols = dict(map(lambda i: (columns[i], t[i]), num_columns))
+				cols = dict([(columns[i], t[i]) for i in num_columns])
 				records.append((no_key, cols))
 			## FOR
 				
 			try:
 				self.conn[sID][tableName].multi_set(records)
-			except KeyError, err:
+			except KeyError as err:
 				sys.stderr.write("%s(%s): server ID does not exist or is offline\n" %(KeyError, err))
 				sys.exit(1)
 
@@ -420,13 +420,13 @@ class TokyocabinetDriver(AbstractDriver):
 				w_key = t[2] # W_ID
 				sID = self.getServer(w_key)
 				ol_key = self.tupleToString(t[:4]) # OL_O_ID, OL_D_ID, OL_W_ID, OL_NUMBER
-				cols = dict(map(lambda i: (columns[i], t[i]), num_columns))
+				cols = dict([(columns[i], t[i]) for i in num_columns])
 				records.append((ol_key, cols))
 			## FOR
 				
 			try:
 				self.conn[sID][tableName].multi_set(records)
-			except KeyError, err:
+			except KeyError as err:
 				sys.stderr.write("%s(%s): server ID does not exist or is offline\n" %(KeyError, err))
 				sys.exit(1)
 
@@ -442,9 +442,9 @@ class TokyocabinetDriver(AbstractDriver):
 
 		logging.info("Creating indexes...")
 		# Add indexes to database after loading all data
-		for serverId, tables in self.databases.iteritems():
+		for serverId, tables in list(self.databases.items()):
 			conn[serverId] = dict()
-			for tab, connValues in tables.iteritems():
+			for tab, connValues in list(tables.items()):
 				conn[serverId][tab] = protocol.TyrantProtocol(connValues["host"], connValues["port"])
 				for index_name in TABLE_COLUMNS[tab]:
 					conn[serverId][tab].add_index(index_name)
@@ -453,8 +453,8 @@ class TokyocabinetDriver(AbstractDriver):
 
 		logging.info("Optimizing indexes...")
 		# Optimize indexes for faster access
-		for serverId, tables in self.databases.iteritems():
-			for tab, connValues in tables.iteritems():
+		for serverId, tables in list(self.databases.items()):
+			for tab, connValues in list(tables.items()):
 				for index_name in TABLE_COLUMNS[tab]:
 					conn[serverId][tab].optimize_index(index_name)
 			## FOR
@@ -462,8 +462,8 @@ class TokyocabinetDriver(AbstractDriver):
 
 		logging.info("Syncing to disk...")
 		# Finally, flush everything to disk
-		for tab in TABLE_COLUMNS.keys():
-			for sID in self.conn.keys():
+		for tab in list(TABLE_COLUMNS.keys()):
+			for sID in list(self.conn.keys()):
 				self.conn[sID][tab].sync()
 		## FOR
 				
@@ -492,7 +492,7 @@ class TokyocabinetDriver(AbstractDriver):
 		customerQuery = self.conn[sID][constants.TABLENAME_CUSTOMER].query
 
 		results = [ ]
-		for d_id in xrange(1, constants.DISTRICTS_PER_WAREHOUSE+1):
+		for d_id in range(1, constants.DISTRICTS_PER_WAREHOUSE+1):
 
 			# getNewOrder
 			# SELECT NO_O_ID FROM NEW_ORDER WHERE NO_D_ID = ? AND NO_W_ID = ? AND NO_O_ID > -1 LIMIT 1
@@ -614,7 +614,7 @@ class TokyocabinetDriver(AbstractDriver):
 
 		all_local = True
 		items = [ ]
-		for i in xrange(len(i_ids)):
+		for i in range(len(i_ids)):
 			## Determine if this is an all local order or not
 			all_local = all_local and i_w_ids[i] == w_id
 			# getItemInfo
@@ -700,7 +700,7 @@ class TokyocabinetDriver(AbstractDriver):
 
 		item_data = [ ]
 		total = 0
-		for i in xrange(len(i_id)):
+		for i in range(len(i_id)):
 			ol_number = i+1
 			ol_supply_w_id = i_w_ids[i]
 			ol_i_id = i_ids[i]

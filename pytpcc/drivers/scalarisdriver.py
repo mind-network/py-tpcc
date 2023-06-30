@@ -6,9 +6,9 @@ Created on May 2, 2011
 Scalaris Driver for CS227 TPCC Benchmark
 '''
 
-from abstractdriver import *
+from .abstractdriver import *
 
-import os, logging, commands, constants
+import os, logging, subprocess, constants
 
 from collections import defaultdict
 
@@ -215,7 +215,7 @@ class ScalarisDriver(AbstractDriver):
     ## loadConfig
     ## ----------------------------------------------
     def loadConfig(self, config):
-        for key in ScalarisDriver.DEFAULT_CONFIG.keys():
+        for key in list(ScalarisDriver.DEFAULT_CONFIG.keys()):
             assert key in config, "Missing parameter '%s' in %s configuration" % (key, self.name)
         
         self.database = str(config["database"])
@@ -256,16 +256,16 @@ class ScalarisDriver(AbstractDriver):
         history_d=defaultdict(lambda : defaultdict(lambda : defaultdict(list)))
         tableDef = TABLE_COLUMNS[constants.TABLENAME_HISTORY]
         for tuple in tuples:
-            history = dict(zip(tableDef,tuple))
+            history = dict(list(zip(tableDef,tuple)))
             w_id = history["H_C_W_ID"]
             d_id = history['H_C_D_ID']
             c_id = history["H_C_ID"]
             
             history_d[w_id][d_id][c_id].append(history)
         
-        for w in history_d.keys():
-            for d in history_d[w].keys():
-                for o in history_d[w][d].keys():
+        for w in list(history_d.keys()):
+            for d in list(history_d[w].keys()):
+                for o in list(history_d[w][d].keys()):
                     history_key = '%s.%s.%s.%s.%s.%s.%s' % (constants.TABLENAME_WAREHOUSE, w,\
                                                     constants.TABLENAME_DISTRICT, d, \
                                                     constants.TABLENAME_CUSTOMER, o,\
@@ -286,22 +286,22 @@ class ScalarisDriver(AbstractDriver):
         stock_idx = defaultdict(list)
         
         for tuple in tuples:
-            stock = dict(zip(tableDef,tuple))
+            stock = dict(list(zip(tableDef,tuple)))
             tuple_short = [tuple[0], tuple[2]]
-            stock_short = dict(zip(['S_I_ID', 'S_QUANTITY'],tuple_short))
+            stock_short = dict(list(zip(['S_I_ID', 'S_QUANTITY'],tuple_short)))
             s_w_id = stock['S_W_ID']
             s_i_id = stock['S_I_ID']
             stock_d[s_w_id][s_i_id] = stock
             stock_idx[s_w_id].append(stock_short)
         
-        for s in stock_d.keys():
+        for s in list(stock_d.keys()):
             s_key = '%s.%s.%s' % (constants.TABLENAME_WAREHOUSE, s, constants.TABLENAME_STOCK)
-            print "key %s" % s_key
-            print "value %s" % stock_idx[s]
+            print(("key %s" % s_key))
+            print(("value %s" % stock_idx[s]))
             self.tran.write(s_key, stock_idx[s])
             
-        for w in stock_d.keys():
-            for i in stock_d[w].keys():
+        for w in list(stock_d.keys()):
+            for i in list(stock_d[w].keys()):
                 s_key = '%s.%s.%s.%s' % (constants.TABLENAME_WAREHOUSE, w, constants.TABLENAME_STOCK, i)
                 self.tran.write(s_key, stock_d[s][i])
            
@@ -317,7 +317,7 @@ class ScalarisDriver(AbstractDriver):
         order_ids = defaultdict(lambda : defaultdict(list))
         tableDef = TABLE_COLUMNS[constants.TABLENAME_ORDER_LINE]
         for tuple in tuples:
-            no = dict(zip(tableDef,tuple))
+            no = dict(list(zip(tableDef,tuple)))
             w_id = no["OL_W_ID"]
             d_id = no['OL_D_ID']
             o_id = no["OL_O_ID"]
@@ -325,15 +325,15 @@ class ScalarisDriver(AbstractDriver):
             ol_d[w_id][d_id][o_id].append(no)
             order_ids[w_id][d_id].append(str(o_id))
         
-        for w in ol_d.keys():
-            for d in ol_d[w].keys():
-                for o in ol_d[w][d].keys():
+        for w in list(ol_d.keys()):
+            for d in list(ol_d[w].keys()):
+                for o in list(ol_d[w][d].keys()):
                     ol_key = '%s.%s.%s.%s.%s.%s' % (constants.TABLENAME_WAREHOUSE, w,\
                                                     constants.TABLENAME_DISTRICT, d, \
                                                     constants.TABLENAME_ORDER_LINE, o)
                     self.tran.write(ol_key, ol_d[w][d][o])
-        for w in order_ids.keys():
-            for d in order_ids[w].keys():
+        for w in list(order_ids.keys()):
+            for d in list(order_ids[w].keys()):
                 no_key = '%s.%s.%s.%s.%s' % (constants.TABLENAME_WAREHOUSE, w,\
                                                     constants.TABLENAME_DISTRICT, d, \
                                                     constants.TABLENAME_ORDER_LINE)
@@ -349,7 +349,7 @@ class ScalarisDriver(AbstractDriver):
         order_ids = defaultdict(lambda : defaultdict(list))
         tableDef = TABLE_COLUMNS[constants.TABLENAME_NEW_ORDER]
         for tuple in tuples:
-            no = dict(zip(tableDef,tuple))
+            no = dict(list(zip(tableDef,tuple)))
             w_id = no["NO_W_ID"]
             d_id = no['NO_D_ID']
             o_id = no["NO_O_ID"]
@@ -357,16 +357,16 @@ class ScalarisDriver(AbstractDriver):
             no_d[w_id][d_id][o_id].append(no)
             order_ids[w_id][d_id].append(str(o_id))
         
-        for w in no_d.keys():
-            for d in no_d[w].keys():
-                for o in no_d[w][d].keys():
+        for w in list(no_d.keys()):
+            for d in list(no_d[w].keys()):
+                for o in list(no_d[w][d].keys()):
                     no_key = '%s.%s.%s.%s.%s.%s' % (constants.TABLENAME_WAREHOUSE, w,\
                                                     constants.TABLENAME_DISTRICT, d, \
                                                     constants.TABLENAME_NEW_ORDER, o)
                     self.tran.write(no_key, no_d[w][d][o])
 
-        for w in order_ids.keys():
-            for d in order_ids[w].keys():
+        for w in list(order_ids.keys()):
+            for d in list(order_ids[w].keys()):
                 no_key = '%s.%s.%s.%s.%s' % (constants.TABLENAME_WAREHOUSE, w,\
                                                     constants.TABLENAME_DISTRICT, d, \
                                                     constants.TABLENAME_NEW_ORDER)
@@ -400,7 +400,7 @@ class ScalarisDriver(AbstractDriver):
         
         
         for tuple in tuples:
-            value = dict(zip(tableDef,tuple))
+            value = dict(list(zip(tableDef,tuple)))
             o_id = value['O_ID']
             c_id = value['O_C_ID']
             d_id = value['O_D_ID']
@@ -411,9 +411,9 @@ class ScalarisDriver(AbstractDriver):
             
             o_d[w_id][d_id][c_id].append(str(o_id))
             
-        for k1 in o_d.keys():
-            for k2 in o_d[k1].keys():
-                for k3 in o_d[k1][k2].keys():
+        for k1 in list(o_d.keys()):
+            for k2 in list(o_d[k1].keys()):
+                for k3 in list(o_d[k1][k2].keys()):
                     orders_key = '%s.%s.%s.%s.%s.%s.%s' % (constants.TABLENAME_WAREHOUSE, k1, constants.TABLENAME_DISTRICT, k2, \
                                             constants.TABLENAME_CUSTOMER, k3, constants.TABLENAME_ORDERS)
                     self.tran.write(orders_key,o_d[k1][k2][k3])
@@ -429,7 +429,7 @@ class ScalarisDriver(AbstractDriver):
         custs = defaultdict(lambda : defaultdict(list))
         tableDef = TABLE_COLUMNS[tableName]
         for tuple in tuples:
-            value = dict(zip(tableDef,tuple)) 
+            value = dict(list(zip(tableDef,tuple))) 
             
             c_last = value['C_LAST']
             c_id = value['C_ID']
@@ -440,8 +440,8 @@ class ScalarisDriver(AbstractDriver):
             w_id = value['C_W_ID']      
             custs[w_id][d_id].append(c_idx)
         
-        for w in custs.keys():
-            for d in custs[w].keys():
+        for w in list(custs.keys()):
+            for d in list(custs[w].keys()):
                 custs_key = '%s.%s.%s.%s.%s' % (constants.TABLENAME_WAREHOUSE, w,\
                                                     constants.TABLENAME_DISTRICT, d, \
                                                     'CUSTOMERS')
@@ -464,12 +464,12 @@ class ScalarisDriver(AbstractDriver):
         
         for tuple in tuples:
             pId= tuple[0]
-            value = dict(zip(tableDef[1:],tuple[1:]))
+            value = dict(list(zip(tableDef[1:],tuple[1:])))
             primaryKey = createPrimaryKey(tableName, pId, value)
             self.tran.write(primaryKey, value)
             #self.tran.commit()
             if idx == 500:
-                print '%s %s' % (tableName, primaryKey)
+                print(('%s %s' % (tableName, primaryKey)))
                 idx = 0 
 #                self.tran.commit()
             idx+=1

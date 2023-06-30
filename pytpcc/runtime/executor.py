@@ -64,14 +64,23 @@ class Executor:
             global_txn_id = global_result.startTransaction(txn)
             batch_txn_id = batch_result.startTransaction(txn)
             if debug: logging.debug("Executing '%s' transaction" % txn)
+            val = None
+            retries = {}
             try:
-                (val, retries) = self.driver.executeTransaction(txn, params)
+                execute_result = self.driver.executeTransaction(txn, params)
+                try: 
+                    (val, retries) = execute_result 
+                except Exception as e:
+                    #print(e)
+                    #print(execute_result)
+                    #print(type(execute_result))
+                    pass
             except KeyboardInterrupt:
                 return -1
-            except (Exception, AssertionError), ex:
+            except (Exception, AssertionError) as ex:
                 logging.warn("Failed to execute Transaction '%s': %s" % (txn, ex))
                 traceback.print_exc(file=sys.stdout)
-                print "Aborting some transaction with some error %s %s" % (txn, ex)
+                print(("Aborting some transaction with some error %s %s" % (txn, ex)))
                 global_result.abortTransaction(global_txn_id)
                 batch_result.abortTransaction(batch_txn_id)
                 if self.stop_on_error: raise
@@ -263,5 +272,5 @@ class Executor:
 ## CLASS
 
 def makeParameterDict(values, *args):
-    return dict(map(lambda x: (x, values[x]), args))
+    return dict([(x, values[x]) for x in args])
 ## DEF

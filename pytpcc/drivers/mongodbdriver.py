@@ -29,18 +29,18 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 # -----------------------------------------------------------------------
 
-from __future__ import with_statement
+
 
 import sys
 import json
 import logging
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from pprint import pformat
 from time import sleep
 import pymongo
 
 import constants
-from abstractdriver import AbstractDriver
+from .abstractdriver import AbstractDriver
 
 TABLE_COLUMNS = {
     constants.TABLENAME_ITEM: [
@@ -288,8 +288,8 @@ class MongodbDriver(AbstractDriver):
             if not 'passwd' in config:
                 logging.error("must specify password if user is specified")
                 sys.exit(1)
-            userpassword = urllib.quote_plus(user)+':'+urllib.quote_plus(config['passwd'])+"@"
-            usersecret = urllib.quote_plus(user)+':'+ '*'*len(config['passwd']) + "@"
+            userpassword = urllib.parse.quote_plus(user)+':'+urllib.parse.quote_plus(config['passwd'])+"@"
+            usersecret = urllib.parse.quote_plus(user)+':'+ '*'*len(config['passwd']) + "@"
 
         pindex = 10  # "mongodb://"
         if uri[0:14] == "mongodb+srv://":
@@ -345,9 +345,9 @@ class MongodbDriver(AbstractDriver):
             logging.error("ConnectionFailure %d (%s) when connected to %s: ",
                           exc.code, exc.details, display_uri)
             return
-        except pymongo.errors.PyMongoError, err:
+        except pymongo.errors.PyMongoError as err:
             logging.error("Some general error (%s) when connected to %s: ", str(err), display_uri)
-            print "Got some other error: %s" % str(err)
+            print(("Got some other error: %s" % str(err)))
             return
 
     ## ----------------------------------------------
@@ -360,7 +360,7 @@ class MongodbDriver(AbstractDriver):
 
         assert tableName in TABLE_COLUMNS, "Table %s not found in TABLE_COLUMNS" % tableName
         columns = TABLE_COLUMNS[tableName]
-        num_columns = range(len(columns))
+        num_columns = list(range(len(columns)))
 
         tuple_dicts = []
 
@@ -395,7 +395,7 @@ class MongodbDriver(AbstractDriver):
             if tableName == constants.TABLENAME_ITEM:
                 tuples3 = []
                 if self.shards > 1:
-                    ww = range(1,self.warehouses+1)
+                    ww = list(range(1,self.warehouses+1))
                 else:
                     ww = [0]
                 for t in tuples:
@@ -416,7 +416,7 @@ class MongodbDriver(AbstractDriver):
     def loadFinishDistrict(self, w_id, d_id):
         if self.denormalize:
             logging.debug("Pushing %d denormalized ORDERS records for WAREHOUSE %d DISTRICT %d into MongoDB", len(self.w_orders), w_id, d_id)
-            self.database[constants.TABLENAME_ORDERS].insert(self.w_orders.values())
+            self.database[constants.TABLENAME_ORDERS].insert(list(self.w_orders.values()))
             self.w_orders.clear()
         ## IF
 
@@ -593,7 +593,7 @@ class MongodbDriver(AbstractDriver):
                                                   session=s)
             if not d:
                 d1 = self.district.find_one({"D_ID": d_id, "D_W_ID": w_id, "$comment": "new order did not find district"})
-                print d1, w_id, d_id, c_id, i_ids, i_w_ids, s_dist_col
+                print((d1, w_id, d_id, c_id, i_ids, i_w_ids, s_dist_col))
             assert d, "Couldn't find district in new order w_id %d d_id %d" % (w_id, d_id)
         else:
             d = self.district.find_one({"D_ID": d_id, "D_W_ID": w_id, "$comment": comment},
@@ -660,7 +660,7 @@ class MongodbDriver(AbstractDriver):
         ## If all of the items are at the same warehouse, then we'll issue a single
         ## request to get their information, otherwise we'll still issue a single request
         ## ----------------
-        item_w_list = zip(i_ids, i_w_ids)
+        item_w_list = list(zip(i_ids, i_w_ids))
         stock_project = {"_id":0, "S_I_ID": 1, "S_W_ID": 1,
                          "S_QUANTITY": 1, "S_DATA": 1, "S_YTD": 1,
                          "S_ORDER_CNT": 1, "S_REMOTE_CNT": 1, s_dist_col: 1}
@@ -670,7 +670,7 @@ class MongodbDriver(AbstractDriver):
                                               session=s))
         else:
             field_list = ["S_I_ID", "S_W_ID"]
-            search_list = [dict(zip(field_list, ze)) for ze in item_w_list]
+            search_list = [dict(list(zip(field_list, ze))) for ze in item_w_list]
             all_stocks = list(self.stock.find({"$or": search_list, "$comment": comment},
                                               stock_project,
                                               session=s))
@@ -891,7 +891,7 @@ class MongodbDriver(AbstractDriver):
                                                   session=s)
             if not d:
                 d1 = self.district.find_one({"D_ID": d_id, "D_W_ID": w_id, "$comment": "payment did not find district"})
-                print d1, w_id, d_id, h_amount, c_w_id, c_d_id, c_id, c_last, h_date
+                print((d1, w_id, d_id, h_amount, c_w_id, c_d_id, c_id, c_last, h_date))
             assert d, "Couldn't find district in payment w_id %d d_id %d" % (w_id, d_id)
         else:
             d = self.district.find_one({"D_W_ID": w_id, "D_ID": d_id, "$comment": comment},
@@ -1095,11 +1095,11 @@ class MongodbDriver(AbstractDriver):
                               exc.code, exc.details, name)
                 return (False, None)
             logging.error("Failed with unknown OperationFailure: %d", exc.code)
-            print "Failed with unknown OperationFailure: %d" % exc.code
-            print exc.details
+            print(("Failed with unknown OperationFailure: %d" % exc.code))
+            print((exc.details))
             raise
         except pymongo.errors.ConnectionFailure:
-            print "ConnectionFailure during %s: " % name
+            print(("ConnectionFailure during %s: " % name))
             return (False, None)
         ## TRY
 
